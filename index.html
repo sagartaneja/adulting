@@ -131,7 +131,6 @@ const W=700,H=270,GND=192,PX=130;
 const IS_MOBILE=('ontouchstart' in window)||navigator.maxTouchPoints>0;
 const GRAVITY=IS_MOBILE?0.22:0.30,JUMP_VEL=-12;
 const SPD_BASE=2.6,SPD_TURBO=5.5,SPD_BACK=1.8;
-const SPD_ACCEL=1.0,SPD_DECEL=0.15;
 const DAY_PHASE=600,WEATHER_CYCLE=1200;
 
 const WEATHER_EVENTS=[
@@ -830,7 +829,6 @@ let g={
   meditating:false,meditateTimer:0,
   flying:false,flyTimer:0,flyY:GND-50,
   boost:0,
-  currentSpd:SPD_BASE,
   duckTaps:0,lastDuckTime:0,
   jumpTimes:[],   // timestamps of recent jumps for triple-jump detection
   ducking_prev:false,
@@ -1054,12 +1052,9 @@ function loop(){
     g.dir=frozen?0:(keys.left?-1:1); // auto-run forward; hold left to go back
     g.ducking=!frozen&&!g.flying&&keys.down&&g.player.onGround;
 
-    const boostMult=g.boost>0?1.5:1;
-    // Smooth speed ramp: hold right to accelerate, release to coast back
-    const targetSpd=keys.right?SPD_TURBO:SPD_BASE;
-    if(g.currentSpd<targetSpd) g.currentSpd=Math.min(targetSpd,g.currentSpd+SPD_ACCEL);
-    else if(g.currentSpd>targetSpd) g.currentSpd=Math.max(targetSpd,g.currentSpd-SPD_DECEL);
-    const spd=g.dir===1?g.currentSpd*boostMult:g.dir===-1?SPD_BACK:0;
+    // Speed: hold right for turbo, default otherwise
+    const activeSPD=keys.right?SPD_TURBO:SPD_BASE;
+    const spd=g.dir===1?activeSPD:g.dir===-1?SPD_BACK:0;
     const asp=g.ducking?spd*0.5:spd;
     g.position+=(asp*g.dir)/60;g.worldX+=asp*g.dir;
     g.pal=blendPalette(Math.abs(g.position));g.weather=getWeather(Math.abs(g.position));
@@ -1269,16 +1264,11 @@ function loop(){
   }
 
   // Speed bar (always visible when moving, subtle)
-  if(g.dir===1&&started&&!g.flying&&g.boost<=0){
-    const spdFrac=(g.currentSpd-SPD_BASE)/(SPD_TURBO-SPD_BASE);
-    if(spdFrac>0.02){
-      const sw=100*spdFrac;
-      ctx.fillStyle="rgba(255,107,107,0.15)";ctx.beginPath();ctx.roundRect(W/2-50,H-16,100,6,3);ctx.fill();
-      ctx.fillStyle=`rgba(255,${Math.round(107+100*(1-spdFrac))},50,0.75)`;
-      ctx.beginPath();ctx.roundRect(W/2-50,H-16,sw,6,3);ctx.fill();
-      ctx.fillStyle="rgba(80,40,20,0.6)";ctx.font="bold 8px Arial,sans-serif";ctx.textAlign="center";
-      ctx.fillText("SPEED",W/2,H-8);ctx.textAlign="left";
-    }
+  if(g.dir===1&&started&&!g.flying&&g.boost<=0&&keys.right){
+    ctx.fillStyle="rgba(255,107,107,0.15)";ctx.beginPath();ctx.roundRect(W/2-50,H-16,100,6,3);ctx.fill();
+    ctx.fillStyle="rgba(255,80,50,0.75)";ctx.beginPath();ctx.roundRect(W/2-50,H-16,100,6,3);ctx.fill();
+    ctx.fillStyle="rgba(80,40,20,0.6)";ctx.font="bold 8px Arial,sans-serif";ctx.textAlign="center";
+    ctx.fillText("TURBO",W/2,H-8);ctx.textAlign="left";
   }
 
   // Early hints
