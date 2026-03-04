@@ -10,7 +10,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
 body{display:flex;flex-direction:column;align-items:center;justify-content:center;
   min-height:100vh;background:linear-gradient(135deg,#e0f4ff 0%,#f0ffe8 100%);
   font-family:'Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif;
-  padding:8px;gap:8px;-webkit-tap-highlight-color:transparent;}
+  padding:8px 8px 14px;gap:6px;-webkit-tap-highlight-color:transparent;}
 
 /* Canvas wrapper — controls are positioned inside this */
 #wrap{position:relative;width:100%;max-width:960px;}
@@ -121,7 +121,7 @@ body.fsmode #padRight{bottom:12px;right:12px;}
   <button class="util" id="muteBtn">&#128266; Sound</button>
   <button class="util" id="fsBtn">&#x26F6; Fullscreen</button>
 </div>
-<p id="hint">Auto-runs forward &nbsp;|&nbsp; Hold &#8594; to speed up &nbsp;|&nbsp; &#8592; hold to go back &nbsp;|&nbsp; &#8593; jump (x3 = FLY!) &nbsp;|&nbsp; &#8595; duck (x3 = meditate)</p>
+<p id="hint">Hold &#8594; speed up &nbsp;|&nbsp; &#8592; go back &nbsp;|&nbsp; &#8593; jump (x3 = fly) &nbsp;|&nbsp; &#8595; duck (x3 = meditate)</p>
 
 <script>
 // ═══════════════════════════════════════════════════════
@@ -130,8 +130,8 @@ body.fsmode #padRight{bottom:12px;right:12px;}
 const W=700,H=270,GND=192,PX=130;
 const IS_MOBILE=('ontouchstart' in window)||navigator.maxTouchPoints>0;
 const GRAVITY=IS_MOBILE?0.22:0.30,JUMP_VEL=-12;
-const SPD_BASE=3.8,SPD_TURBO=6.5,SPD_BACK=1.8;
-const SPD_ACCEL=0.06,SPD_DECEL=0.04; // ramp up fast, ease down gently
+const SPD_BASE=IS_MOBILE?2.2:3.8,SPD_TURBO=IS_MOBILE?4.5:7.5,SPD_BACK=1.8;
+const SPD_ACCEL=0.12,SPD_DECEL=0.06; // faster ramp so difference is noticeable
 const DAY_PHASE=600,WEATHER_CYCLE=1200;
 
 const WEATHER_EVENTS=[
@@ -970,24 +970,22 @@ document.getElementById("muteBtn").addEventListener("click",()=>{
 
 document.getElementById("fsBtn").addEventListener("click",()=>{
   resumeAudio();
-  const el=document.documentElement;
   if(document.fullscreenElement||document.webkitFullscreenElement){
-    // Exit fullscreen
     if(document.exitFullscreen)document.exitFullscreen();
     else if(document.webkitExitFullscreen)document.webkitExitFullscreen();
     document.body.classList.remove("fsmode");
     document.getElementById("fsBtn").textContent="\u26F6 Fullscreen";
   }else{
-    // Try standard fullscreen API
+    const el=document.body;
     const req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen;
     if(req){
-      req.call(el).catch(()=>{
-        // Fallback for iOS: CSS pseudo-fullscreen
+      req.call(el).then(()=>{
+        document.getElementById("fsBtn").textContent="\u2715 Exit Fullscreen";
+      }).catch(()=>{
         document.body.classList.add("fsmode");
         document.getElementById("fsBtn").textContent="\u2715 Exit Fullscreen";
       });
     }else{
-      // iOS Safari fallback
       document.body.classList.add("fsmode");
       document.getElementById("fsBtn").textContent="\u2715 Exit Fullscreen";
     }
