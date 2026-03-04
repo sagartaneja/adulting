@@ -915,7 +915,7 @@ function gameResume(){
 
 // Keyboard
 document.addEventListener("keydown",e=>{
-  if(e.code==="ArrowRight"){e.preventDefault();gameStart();gameResume();}
+  if(e.code==="ArrowRight"){e.preventDefault();gameStart();gameResume();keys.right=true;}
   if(e.code==="ArrowLeft") {e.preventDefault();gameStart();gameResume();keys.left=true;}
   if(e.code==="ArrowDown"){e.preventDefault();gameStart();keys.down=true;if(!e.repeat)registerDuckTap();}
   if(e.code==="Space"||e.code==="ArrowUp"){e.preventDefault();gameStart();jumpAction();}
