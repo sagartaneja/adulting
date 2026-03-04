@@ -130,7 +130,7 @@ body.fsmode #padRight{bottom:12px;right:12px;}
 const W=700,H=270,GND=192,PX=130;
 const IS_MOBILE=('ontouchstart' in window)||navigator.maxTouchPoints>0;
 const GRAVITY=IS_MOBILE?0.22:0.30,JUMP_VEL=-12;
-const SPD_BASE=2.6,SPD_TURBO=5.5,SPD_BACK=1.8;
+const SPD_BASE=IS_MOBILE?5.5:2.6,SPD_TURBO=IS_MOBILE?9.0:6.5,SPD_BACK=1.8;
 const DAY_PHASE=600,WEATHER_CYCLE=1200;
 
 const WEATHER_EVENTS=[
